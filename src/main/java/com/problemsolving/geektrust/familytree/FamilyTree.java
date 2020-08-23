@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 public class FamilyTree {
     private final FamilyTreeEntry rootMember;
     private transient int size = 0;
-    private transient int modCount = 0;
 
     public FamilyTree(String rootMember, String spouse, Gender gender) {
         this.rootMember = new FamilyTreeEntry(rootMember, spouse, gender, null);
@@ -60,22 +59,10 @@ public class FamilyTree {
     }
 
     private Set<FamilyTreeEntry> getAllChildren(FamilyTreeEntry entry) {
-        if (entry.getChildren().isEmpty()) {
-            return Sets.newHashSet(entry);
-        } else {
-            return Stream.concat(Stream.of(entry), entry.getChildren().stream()
-                    .map(this::getAllChildren)
-                    .flatMap(Set::stream))
-                    .collect(Collectors.toSet());
-//            Set<FamilyTreeEntry> allChildren = entry.getChildren().stream()
-//                    .map(this::getAllChildren)
-//                    .reduce((entries, entries2) -> {
-//                        entries.addAll(entries2);
-//                        return entries;
-//                    }).get();
-//            allChildren.add(entry);
-//            return allChildren;
-        }
+        return entry.getChildren().isEmpty() ? Sets.newHashSet(entry) : Stream.concat(Stream.of(entry), entry.getChildren().stream()
+                .map(this::getAllChildren)
+                .flatMap(Set::stream))
+                .collect(Collectors.toSet());
     }
 
     public FamilyTreeEntry getRootMember() {

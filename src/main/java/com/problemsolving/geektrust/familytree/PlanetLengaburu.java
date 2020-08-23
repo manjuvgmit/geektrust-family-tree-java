@@ -8,16 +8,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.problemsolving.geektrust.familytree.Gender.FEMALE;
 import static com.problemsolving.geektrust.familytree.Gender.MALE;
 import static com.problemsolving.geektrust.familytree.MiscUtils.getInput;
 import static java.util.Objects.requireNonNull;
 
 public class PlanetLengaburu {
+    static Logger LOGGER = LoggerFactory.getLogger(PlanetLengaburu.class.getSimpleName());
     public static final String FILE_PATH_AS_FIRST_ARGUMENT = "Pass in the file path as first argument.";
     public static final String MISSING_COMMANDS = "Missing commands.";
-    static Logger LOGGER = LoggerFactory.getLogger(PlanetLengaburu.class.getSimpleName());
-    private FamilyTree lengaburuFamily;
+
+    private FamilyTree theShanFamilyTree;
 
     public static void main(String[] args) throws Exception {
         requireNonNull(args, FILE_PATH_AS_FIRST_ARGUMENT);
@@ -45,16 +45,16 @@ public class PlanetLengaburu {
     }
 
     private void init() {
-        lengaburuFamily = new FamilyTree("King Shan", "Queen Anga", MALE);
+        theShanFamilyTree = new FamilyTree("King Shan", "Queen Anga", MALE);
         // Level 01
-        String kingShan = lengaburuFamily.getRootMember().getMember();
-        lengaburuFamily.addMember(kingShan, "Chit", "Amba", MALE);
-        lengaburuFamily.addMember(kingShan, "Ish", MALE);
-        lengaburuFamily.addMember(kingShan, "Vich", "Lika", MALE);
-        lengaburuFamily.addMember(kingShan, "Aras", "Chitra", MALE);
-        lengaburuFamily.addMember(kingShan, "Satya", "Vyan", MALE);
+        String kingShan = theShanFamilyTree.getRootMember().getMember();
+        theShanFamilyTree.addMember(kingShan, "Chit", "Amba", MALE);
+        theShanFamilyTree.addMember(kingShan, "Ish", MALE);
+        theShanFamilyTree.addMember(kingShan, "Vich", "Lika", MALE);
+        theShanFamilyTree.addMember(kingShan, "Aras", "Chitra", MALE);
+        theShanFamilyTree.addMember(kingShan, "Satya", "Vyan", MALE);
         // Level 02
-        lengaburuFamily.addMember(kingShan, "Satya", "Vyan", MALE);
+        theShanFamilyTree.addMember(kingShan, "Satya", "Vyan", MALE);
 
     }
 
