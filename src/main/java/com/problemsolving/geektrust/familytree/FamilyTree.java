@@ -1,10 +1,12 @@
 package com.problemsolving.geektrust.familytree;
 
 import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
@@ -53,7 +55,7 @@ public class FamilyTree {
     }
 
     public Set<FamilyTreeEntry> getAllEntries() {
-        return Streams.concat(Sets.newHashSet(this.rootMember).stream(), getAllChildren(this.rootMember).stream())
+        return Stream.concat(Sets.newHashSet(this.rootMember).stream(), getAllChildren(this.rootMember).stream())
                 .collect(Collectors.toSet());
     }
 
@@ -61,12 +63,9 @@ public class FamilyTree {
         if (entry.getChildren().isEmpty()) {
             return Sets.newHashSet(entry);
         } else {
-            return entry.getChildren().stream()
+            return Stream.concat(Stream.of(entry), entry.getChildren().stream()
                     .map(this::getAllChildren)
-                    .map(stream -> stream.stream())
-                    .map(Set::stream)
-                    .map(Streams::concat)
-                    .map(stream -> Streams.concat(Sets.newHashSet(entry).stream(), stream))
+                    .flatMap(Set::stream))
                     .collect(Collectors.toSet());
 //            Set<FamilyTreeEntry> allChildren = entry.getChildren().stream()
 //                    .map(this::getAllChildren)
