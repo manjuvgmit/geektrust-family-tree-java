@@ -6,20 +6,29 @@ import java.util.Set;
 
 public class FamilyTreeEntry {
     private String member;
-    private String spouse;
     private Gender gender;
+    private String spouse;
     private FamilyTreeEntry parent;
     private Set<FamilyTreeEntry> children;
 
-    public FamilyTreeEntry(String member, String spouse, Gender gender, FamilyTreeEntry parent) {
+    public FamilyTreeEntry(String member, Gender gender, String spouse, FamilyTreeEntry parent) {
         this.member = member;
-        this.spouse = spouse;
         this.gender = gender;
+        this.spouse = spouse;
+        this.parent = parent;
         this.children = new LinkedHashSet<>();
     }
 
     public FamilyTreeEntry(String member, Gender gender, FamilyTreeEntry parent) {
-        this(member, null, gender, parent);
+        this(member, gender, null, parent);
+    }
+
+    public FamilyTreeEntry(String member, Gender gender, String spouse) {
+        this(member, gender, spouse, null);
+    }
+
+    public FamilyTreeEntry(String member, Gender gender) {
+        this(member, gender, null, null);
     }
 
     public String getMember() {
@@ -38,12 +47,20 @@ public class FamilyTreeEntry {
         this.spouse = spouse;
     }
 
-    public Gender getSex() {
+    public Gender getGender() {
         return gender;
     }
 
-    public void setSex(Gender gender) {
+    public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public boolean isMale() {
+        return getGender().isMale();
+    }
+
+    public boolean isFemale() {
+        return getGender().isFemale();
     }
 
     public FamilyTreeEntry getParent() {
@@ -77,12 +94,12 @@ public class FamilyTreeEntry {
 
     @Override
     public String toString() {
-        return "\n--FamilyTreeEntry{" +
+        return "FamilyTreeEntry{" +
                 "member='" + member + '\'' +
                 ", spouse='" + spouse + '\'' +
-                ", sex=" + gender +
-                ", parent=" + parent +
+                ", gender=" + gender +
+                ", parent=" + (parent != null ? parent.getMember() : null) +
                 ", children=" + children +
-                '}';
+                "}";
     }
 }

@@ -3,59 +3,74 @@ package com.problemsolving.geektrust.familytree;
 import com.google.common.collect.Sets;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
 public class FamilyTree {
+    public static final String CHILD_ADDITION_SUCCEEDED = "CHILD_ADDITION_SUCCEEDED";
     private final FamilyTreeEntry rootMember;
     private transient int size = 0;
 
     public FamilyTree(String rootMember, String spouse, Gender gender) {
-        this.rootMember = new FamilyTreeEntry(rootMember, spouse, gender, null);
+        this.rootMember = new FamilyTreeEntry(rootMember, gender, spouse, null);
     }
 
-    public FamilyTreeEntry addMember(String parent, String member, Gender gender) {
-        return addMember(parent, member, null, gender);
+    public String addMember(String mother, String member, Gender gender) {
+        return addMember(mother, member, gender, null);
     }
 
-    public FamilyTreeEntry addMember(String parent, String member, String spouse, Gender gender) {
-        requireNonNull(parent);
+    public String addMember(String mother, String member, Gender gender, String spouse) {
+        checkAndThrowIfMandatoryFieldsMissing(mother, member, gender);
+        FamilyTreeEntry newEntry = new FamilyTreeEntry(member, gender, spouse);
+        FamilyTreeEntry parent = getParent(mother);
+        if (Objects.isNull(parent)) {
+            return new StringBuilder().append("Couldn't find the parent: ").append(mother).toString();
+        } else if (checkIfMemberExists(parent, member)) {
+            return new StringBuilder()
+                    .append("Duplicate member entry. member: ")
+                    .append(member)
+                    .append(", parent: ")
+                    .append(mother).toString();
+        } else {
+            newEntry.setParent(parent);
+            parent.addChildren(newEntry);
+            size++;
+            return CHILD_ADDITION_SUCCEEDED;
+        }
+    }
+
+    private FamilyTreeEntry getParent(String mother) {
+        return matchParent(rootMember, mother)
+                ? rootMember
+                : getAllEntries().stream()
+                .filter(entry -> matchParent(entry, mother))
+                .findFirst().orElse(null);
+    }
+
+    private boolean matchParent(FamilyTreeEntry entry, String mother) {
+        return Objects.equals(mother, entry.getGender().isFemale() ? entry.getMember() : entry.getSpouse());
+    }
+
+    private void checkAndThrowIfMandatoryFieldsMissing(String mother, String member, Gender gender) {
+        requireNonNull(mother);
         requireNonNull(member);
         requireNonNull(gender);
-        FamilyTreeEntry newEntry = new FamilyTreeEntry(member, spouse, gender, this.rootMember);
-        if (Objects.equals(this.rootMember.getMember(), parent)) {
-            if (this.rootMember.getChildren().stream().anyMatch(entry -> Objects.equals(entry.getMember(), member))) {
-                new Exception("Duplicate Child.");
-            } else {
-                this.rootMember.addChildren(newEntry);
-                size++;
-            }
-        } else {
-            Optional<FamilyTreeEntry> parentFamilyTreeEntry = getAllEntries().stream()
-                    .filter(entry -> Objects.equals(entry.getMember(), parent))
-                    .findFirst();
-            if (parentFamilyTreeEntry.isPresent()) {
-                if (parentFamilyTreeEntry.get().getChildren().stream()
-                        .anyMatch(entry -> Objects.equals(entry.getMember(), member))) {
-                    new Exception("Duplicate Child.");
-                } else {
-                    parentFamilyTreeEntry.get().addChildren(newEntry);
-                    size++;
-                }
-            } else {
-                new Exception("Parent not found.");
-            }
-        }
-        return newEntry;
     }
 
     public Set<FamilyTreeEntry> getAllEntries() {
-        return Stream.concat(Sets.newHashSet(this.rootMember).stream(), getAllChildren(this.rootMember).stream())
+        return Stream.concat(Sets.newHashSet(rootMember).stream(), getAllChildren(rootMember).stream())
                 .collect(Collectors.toSet());
+    }
+
+    public FamilyTreeEntry getEntryWithMatchingName(String name) {
+        return Stream.concat(Sets.newHashSet(rootMember).stream(), getAllChildren(rootMember).stream())
+                .filter(entry -> Objects.equals(name, entry.getMember()) || Objects.equals(name, entry.getSpouse()))
+                .findFirst()
+                .orElse(null);
     }
 
     private Set<FamilyTreeEntry> getAllChildren(FamilyTreeEntry entry) {
@@ -65,18 +80,24 @@ public class FamilyTree {
                 .collect(Collectors.toSet());
     }
 
+    private boolean checkIfMemberExists(FamilyTreeEntry entry, String childName) {
+        return entry.getChildren().stream().anyMatch(familyTreeEntry -> Objects.equals(entry.getMember(), childName));
+    }
+
     public FamilyTreeEntry getRootMember() {
-        return this.rootMember;
+        return rootMember;
     }
 
     private int size() {
-        return this.size;
+        return size;
     }
 
     @Override
     public String toString() {
-        return "FamilyTree{" +
-                "root=" + rootMember +
-                '}';
+        final StringBuilder sb = new StringBuilder("FamilyTree{");
+        sb.append("rootMember=").append(rootMember);
+        sb.append(", size=").append(size);
+        sb.append('}');
+        return sb.toString();
     }
 }
