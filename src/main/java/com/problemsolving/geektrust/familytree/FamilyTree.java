@@ -13,6 +13,7 @@ public class FamilyTree {
     public static final String CHILD_ADDITION_SUCCEEDED = "CHILD_ADDITION_SUCCEEDED";
     public static final String PERSON_NOT_FOUND = "PERSON_NOT_FOUND";
     public static final String PERSON_ALREADY_EXISTS = "PERSON_ALREADY_EXISTS";
+    public static final String CHILD_ADDITION_FAILED = "CHILD_ADDITION_FAILED";
     private final Entry rootMember;
     private transient int size = 0;
 
@@ -32,6 +33,8 @@ public class FamilyTree {
             return PERSON_NOT_FOUND;
         } else if (checkIfMemberExists(parent, member)) {
             return PERSON_ALREADY_EXISTS;
+        } else if (parent.isMale() && Objects.equals(parent.member, mother)) {
+            return CHILD_ADDITION_FAILED;
         } else {
             newEntry.setParent(parent);
             parent.getChildren().add(newEntry);
@@ -180,7 +183,10 @@ public class FamilyTree {
         }
 
         public static Gender fromValue(String name) {
-            return Arrays.stream(values()).filter(gender -> Objects.equals(gender.name(), name)).findFirst().orElse(null);
+            return Arrays.stream(values())
+                    .filter(gender -> Objects.equals(gender.name(), name))
+                    .findFirst()
+                    .orElse(null);
         }
     }
 }

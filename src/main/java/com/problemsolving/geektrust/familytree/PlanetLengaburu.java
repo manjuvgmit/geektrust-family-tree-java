@@ -137,6 +137,7 @@ public class PlanetLengaburu {
     private void addMembers(String parent, List<List<String>> members) {
         members.stream().forEach(member -> {
             try {
+                theShanFamilyTree.addMember(parent, member.get(0), Gender.valueOf(member.get(1)), member.size() > 2 ? member.get(2) : null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
