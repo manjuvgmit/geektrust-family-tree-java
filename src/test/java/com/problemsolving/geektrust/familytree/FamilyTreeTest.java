@@ -6,6 +6,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 import static com.google.common.collect.ImmutableList.of;
 import static com.problemsolving.geektrust.familytree.FamilyTree.CHILD_ADDITION_SUCCEEDED;
+import static com.problemsolving.geektrust.familytree.FamilyTree.PERSON_NOT_FOUND;
 import static com.problemsolving.geektrust.familytree.PlanetLengaburu.INVALID_PARAMETERS;
 import static org.junit.Assert.assertEquals;
 
@@ -13,6 +14,10 @@ import static org.junit.Assert.assertEquals;
 public class FamilyTreeTest {
 
     private PlanetLengaburu planetLengaburu = new PlanetLengaburu();
+
+    public FamilyTreeTest() throws Exception {
+
+    }
 
     @Test
     public void testAddMemberValidScenario() throws Exception {
@@ -23,7 +28,7 @@ public class FamilyTreeTest {
 
     @Test
     public void testAddMemberInValidScenarioMissingMother() throws Exception {
-        assertEquals(of("Couldn't find the parent: Ramya"), planetLengaburu.startFromListOfArgs(of(
+        assertEquals(of(PERSON_NOT_FOUND), planetLengaburu.startFromListOfArgs(of(
                 "ADD_CHILD Ramya Soumya Female"
         )));
     }
@@ -58,7 +63,7 @@ public class FamilyTreeTest {
 
     @Test
     public void testRelation() throws Exception {
-        assertEquals(of("Jnki Ahit"), planetLengaburu.startFromListOfArgs(of(
+        assertEquals(of("NONE"), planetLengaburu.startFromListOfArgs(of(
                 "GET_RELATIONSHIP Lavanya Maternal-Aunt"
         )));
     }

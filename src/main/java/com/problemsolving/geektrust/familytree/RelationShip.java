@@ -1,5 +1,7 @@
 package com.problemsolving.geektrust.familytree;
 
+import com.problemsolving.geektrust.familytree.FamilyTree.Entry;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -10,33 +12,33 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
 
 public enum RelationShip {
-    PATERNAL_UNCLE(entry -> entry.getParent().isMale() ? RelationShip.getUncles(entry, FamilyTreeEntry::getMember) : emptySet()),
-    MATERNAL_UNCLE(entry -> entry.getParent().isFemale() ? RelationShip.getUncles(entry, FamilyTreeEntry::getMember) : emptySet()),
-    PATERNAL_AUNT(entry -> entry.getParent().isMale() ? RelationShip.getAunts(entry, FamilyTreeEntry::getMember) : emptySet()),
-    MATERNAL_AUNT(entry -> entry.getParent().isFemale() ? RelationShip.getAunts(entry, FamilyTreeEntry::getMember) : emptySet()),
+    PATERNAL_UNCLE(entry -> entry.getParent().isMale() ? getUncles(entry, Entry::getMember) : emptySet()),
+    MATERNAL_UNCLE(entry -> entry.getParent().isFemale() ? getUncles(entry, Entry::getMember) : emptySet()),
+    PATERNAL_AUNT(entry -> entry.getParent().isMale() ? getAunts(entry, Entry::getMember) : emptySet()),
+    MATERNAL_AUNT(entry -> entry.getParent().isFemale() ? getAunts(entry, Entry::getMember) : emptySet()),
     SISTER_IN_LAW(RelationShip::getSisterInLaws),
     BROTHER_IN_LAW(RelationShip::getBrotherInLaws),
     SON(entry -> entry.getChildren().stream()
-            .filter(FamilyTreeEntry::isMale)
-            .map(FamilyTreeEntry::getMember)
+            .filter(Entry::isMale)
+            .map(Entry::getMember)
             .collect(toSet())),
     DAUGHTER(entry -> entry.getChildren().stream()
-            .filter(FamilyTreeEntry::isFemale)
-            .map(FamilyTreeEntry::getMember)
+            .filter(Entry::isFemale)
+            .map(Entry::getMember)
             .collect(toSet())),
-    SIBLINGS(entry -> RelationShip.getSiblings(entry, FamilyTreeEntry::getMember));
+    SIBLINGS(entry -> getSiblings(entry, Entry::getMember));
 
-    Function<FamilyTreeEntry, Set<String>> finder;
+    Function<Entry, Set<String>> finder;
 
-    RelationShip(Function<FamilyTreeEntry, Set<String>> finder) {
+    RelationShip(Function<Entry, Set<String>> finder) {
         this.finder = finder;
     }
 
-    public Set<String> getAllOfThem(FamilyTreeEntry entry) {
+    public Set<String> getAllOfThem(Entry entry) {
         return finder.apply(entry);
     }
 
-    public static Set<String> getRelations(Set<FamilyTreeEntry> entries, Predicate<FamilyTreeEntry> relationMatcher, Function<FamilyTreeEntry, String> nameExtractor) {
+    public static Set<String> getRelations(Set<Entry> entries, Predicate<Entry> relationMatcher, Function<Entry, String> nameExtractor) {
         return entries.stream()
                 .filter(relationMatcher)
                 .map(nameExtractor)
@@ -44,18 +46,18 @@ public enum RelationShip {
                 .collect(toSet());
     }
 
-    public static Set<String> getAunts(FamilyTreeEntry entry, Function<FamilyTreeEntry, String> nameExtractor) {
-        return getUnclesAndAunts(entry, FamilyTreeEntry::isFemale, nameExtractor);
+    public static Set<String> getAunts(Entry entry, Function<Entry, String> nameExtractor) {
+        return getUnclesAndAunts(entry, Entry::isFemale, nameExtractor);
     }
 
-    public static Set<String> getUncles(FamilyTreeEntry entry, Function<FamilyTreeEntry, String> nameExtractor) {
-        return getUnclesAndAunts(entry, FamilyTreeEntry::isMale, nameExtractor);
+    public static Set<String> getUncles(Entry entry, Function<Entry, String> nameExtractor) {
+        return getUnclesAndAunts(entry, Entry::isMale, nameExtractor);
     }
 
-    public static Set<String> getUnclesAndAunts(FamilyTreeEntry entry, Predicate<FamilyTreeEntry> predicate, Function<FamilyTreeEntry, String> nameExtractor) {
+    public static Set<String> getUnclesAndAunts(Entry entry, Predicate<Entry> predicate, Function<Entry, String> nameExtractor) {
         return getRelations(ofNullable(entry.getParent())
-                        .map(FamilyTreeEntry::getParent)
-                        .map(FamilyTreeEntry::getChildren)
+                        .map(Entry::getParent)
+                        .map(Entry::getChildren)
                         .map(entries -> entries.stream().filter(e -> !Objects.equals(
                                 e.getMember(), entry.getParent().getMember()))
                                 .collect(toSet()))
@@ -64,20 +66,20 @@ public enum RelationShip {
                 nameExtractor);
     }
 
-    public static Set<String> getSisterInLaws(FamilyTreeEntry entry) {
-        return getBrotherOrSisterInLaws(entry, FamilyTreeEntry::isMale, FamilyTreeEntry::getSpouse);
+    public static Set<String> getSisterInLaws(Entry entry) {
+        return getBrotherOrSisterInLaws(entry, Entry::isMale, Entry::getSpouse);
     }
 
-    public static Set<String> getBrotherInLaws(FamilyTreeEntry entry) {
-        return getBrotherOrSisterInLaws(entry, FamilyTreeEntry::isFemale, FamilyTreeEntry::getSpouse);
+    public static Set<String> getBrotherInLaws(Entry entry) {
+        return getBrotherOrSisterInLaws(entry, Entry::isFemale, Entry::getSpouse);
     }
 
-    public static Set<String> getBrotherOrSisterInLaws(FamilyTreeEntry entry, Predicate<FamilyTreeEntry> predicate, Function<FamilyTreeEntry, String> nameExtractor) {
+    public static Set<String> getBrotherOrSisterInLaws(Entry entry, Predicate<Entry> predicate, Function<Entry, String> nameExtractor) {
         return getRelations(entry.getParent().getChildren().stream().filter(e -> !Objects.equals(e.getMember(), entry.getMember())).collect(toSet()),
                 predicate, nameExtractor);
     }
 
-    public static Set<String> getSiblings(FamilyTreeEntry entry, Function<FamilyTreeEntry, String> nameExtractor) {
+    public static Set<String> getSiblings(Entry entry, Function<Entry, String> nameExtractor) {
         return getRelations(entry.getParent().getChildren(), e -> !Objects.equals(e.getMember(), entry.getMember()), nameExtractor);
     }
 }

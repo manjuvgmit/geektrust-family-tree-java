@@ -3,6 +3,8 @@
  */
 package com.problemsolving.geektrust.familytree;
 
+import com.google.common.collect.ImmutableList;
+import com.problemsolving.geektrust.familytree.FamilyTree.Gender;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +16,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.of;
-import static com.problemsolving.geektrust.familytree.Gender.Female;
-import static com.problemsolving.geektrust.familytree.Gender.Male;
+import static com.problemsolving.geektrust.familytree.FamilyTree.Gender.Female;
+import static com.problemsolving.geektrust.familytree.FamilyTree.Gender.Male;
+import static com.problemsolving.geektrust.familytree.FamilyTree.PERSON_NOT_FOUND;
 import static com.problemsolving.geektrust.familytree.MiscUtils.getInput;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -25,12 +28,16 @@ public class PlanetLengaburu {
     static Logger LOGGER = LoggerFactory.getLogger(PlanetLengaburu.class.getSimpleName());
 
     public static final String NONE = "NONE";
-    public static final String INVALID_OPERATION = "invalid operation.";
-    public static final String INVALID_PARAMETERS = "Invalid Parameters";
+    public static final String INVALID_OPERATION = "INVALID_OPERATION";
+    public static final String INVALID_PARAMETERS = "INVALID_PARAMETERS";
     public static final String FILE_PATH_AS_FIRST_ARGUMENT = "Pass in the file path as first argument.";
-    public static final String MISSING_COMMANDS = "Missing commands.";
+    public static final String MISSING_COMMANDS = "MISSING_COMMANDS";
 
     private FamilyTree theShanFamilyTree;
+
+    public PlanetLengaburu() throws Exception {
+        init();
+    }
 
     public static void main(String[] args) throws Exception {
         requireNonNull(args, FILE_PATH_AS_FIRST_ARGUMENT);
@@ -44,12 +51,7 @@ public class PlanetLengaburu {
 
     public List<String> startFromListOfArgs(List<String> inputs) throws Exception {
         requireNonNull(inputs, MISSING_COMMANDS);
-        if (inputs.size() == 0) {
-            throw new Exception(MISSING_COMMANDS);
-        } else {
-            init();
-            return processCommands(inputs);
-        }
+        return inputs.size() != 0 ? processCommands(inputs) : of(MISSING_COMMANDS);
     }
 
     private List<String> processCommands(List<String> inputs) throws Exception {
@@ -72,12 +74,13 @@ public class PlanetLengaburu {
                 output = theShanFamilyTree.addMember(params.get(1), params.get(2), gender);
                 break;
             case GET_RELATIONSHIP:
-                FamilyTreeEntry entry = theShanFamilyTree.getEntryWithMatchingName(params.get(1));
+                FamilyTree.Entry entry = theShanFamilyTree.getEntryWithMatchingName(params.get(1));
                 output = Objects.nonNull(entry) ? Optional.of(RelationShip.valueOf(ofNullable(params.get(2)).map(String::toUpperCase).map(s -> s.replaceAll("-", "_")).orElse(null)))
                         .map(relationShip -> relationShip.getAllOfThem(entry))
                         .map(strings -> String.join(" ", strings))
+                        .filter(StringUtils::isNotEmpty)
                         .orElse(NONE)
-                        : NONE;
+                        : PERSON_NOT_FOUND;
                 break;
             default:
                 output = INVALID_OPERATION;
@@ -88,7 +91,7 @@ public class PlanetLengaburu {
     private void init() throws Exception {
         theShanFamilyTree = new FamilyTree("King Shan", "Queen Anga", Male);
         // Level 01
-        addMembers(theShanFamilyTree.getRootMember().getSpouse(), of(
+        addMembers(theShanFamilyTree.getRootMember().getSpouse(), ImmutableList.of(
                 of("Chit", Male.name(), "Amba"),
                 of("Ish", Male.name()),
                 of("Vich", Male.name(), "Lika"),
@@ -134,7 +137,6 @@ public class PlanetLengaburu {
     private void addMembers(String parent, List<List<String>> members) {
         members.stream().forEach(member -> {
             try {
-                theShanFamilyTree.addMember(parent, member.get(0), Gender.valueOf(member.get(1)), member.size() > 2 ? member.get(2) : null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
