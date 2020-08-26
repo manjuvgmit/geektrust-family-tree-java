@@ -14,9 +14,7 @@ public class FamilyTreeTest {
 
     private PlanetLengaburu planetLengaburu = new PlanetLengaburu();
 
-    public FamilyTreeTest() throws Exception {
-
-    }
+    public FamilyTreeTest() throws Exception {}
 
     @Test
     public void testAddMemberValidScenario() throws Exception {
@@ -63,7 +61,7 @@ public class FamilyTreeTest {
     @Test
     public void testRelation() throws Exception {
         assertEquals(of("NONE"), planetLengaburu.startFromListOfArgs(of(
-                "GET_RELATIONSHIP Lavanya Maternal-Aunt"
+                "GET_RELATIONSHIP Lavnya Maternal-Aunt"
         )));
     }
 
@@ -71,7 +69,7 @@ public class FamilyTreeTest {
     public void testAddMemberAndRelationCombine() throws Exception {
         assertEquals(of(CHILD_ADDITION_SUCCEEDED, "Aria", "Jnki Ahit"), planetLengaburu.startFromListOfArgs(of(
                 "ADD_CHILD Chitra Aria Female",
-                "GET_RELATIONSHIP Lavanya Maternal-Aunt",
+                "GET_RELATIONSHIP Lavnya Maternal-Aunt",
                 "GET_RELATIONSHIP Aria Siblings"
         )));
     }
@@ -90,4 +88,29 @@ public class FamilyTreeTest {
                 "GET_RELATIONSHIP Pjali Son"
         )));
     }
+
+    @Test
+    public void testCase01() throws Exception {
+        assertEquals(of(CHILD_ADDITION_SUCCEEDED, "Satya", "Ahit"), planetLengaburu.startFromListOfArgs(of(
+                "ADD_CHILD Chitra Aria Female",
+                "GET_RELATIONSHIP Aria Paternal-Aunt",
+                "GET_RELATIONSHIP Lavnya Maternal-Uncle"
+        )));
+    }
+
+    @Test
+    public void testCase02() throws Exception {
+        assertEquals(of(CHILD_ADDITION_SUCCEEDED, "Atya Yaya"), planetLengaburu.startFromListOfArgs(of(
+                "ADD_CHILD Satya Yaya Female",
+                "GET_RELATIONSHIP Satvy Sister-In-Law"
+        )));
+    }
+
+    @Test
+    public void testCase03() throws Exception {
+        assertEquals(of("Satvy Krpi"), planetLengaburu.startFromListOfArgs(of(
+                "GET_RELATIONSHIP Atya Sister-In-Law"
+        )));
+    }
+
 }

@@ -21,10 +21,6 @@ public class FamilyTree {
         this.rootMember = new Entry(rootMember, gender, spouse, null);
     }
 
-    public String addMember(String mother, String member, Gender gender) {
-        return addMember(mother, member, gender, null);
-    }
-
     public String addMember(String mother, String member, Gender gender, String spouse) {
         MiscUtils.requiresNonNull(mother, member, gender);
         Entry newEntry = new Entry(member, gender, spouse);
@@ -163,9 +159,9 @@ public class FamilyTree {
         public String toString() {
             return "Entry{" +
                     "member='" + member + '\'' +
-                    ", spouse='" + spouse + '\'' +
                     ", gender=" + gender +
                     ", parent=" + (parent != null ? parent.getMember() : null) +
+                    ", spouse='" + spouse + '\'' +
                     ", children=" + children +
                     "}";
         }

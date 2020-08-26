@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 public final class MiscUtils {
+
     public static List<String> getInput(String inputFilePath) throws IOException {
         return Files.readAllLines(Paths.get(inputFilePath));
     }
@@ -15,4 +16,5 @@ public final class MiscUtils {
     public static void requiresNonNull(Object... args) {
         Arrays.stream(args).forEach(Objects::requireNonNull);
     }
+
 }

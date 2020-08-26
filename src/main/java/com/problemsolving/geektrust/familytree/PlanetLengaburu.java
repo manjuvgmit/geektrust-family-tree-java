@@ -3,26 +3,18 @@
  */
 package com.problemsolving.geektrust.familytree;
 
-import com.google.common.collect.ImmutableList;
-import com.problemsolving.geektrust.familytree.FamilyTree.Gender;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.of;
-import static com.problemsolving.geektrust.familytree.FamilyTree.Gender.Female;
 import static com.problemsolving.geektrust.familytree.FamilyTree.Gender.Male;
-import static com.problemsolving.geektrust.familytree.FamilyTree.PERSON_NOT_FOUND;
 import static com.problemsolving.geektrust.familytree.MiscUtils.getInput;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class PlanetLengaburu {
     static Logger LOGGER = LoggerFactory.getLogger(PlanetLengaburu.class.getSimpleName());
@@ -32,11 +24,13 @@ public class PlanetLengaburu {
     public static final String INVALID_PARAMETERS = "INVALID_PARAMETERS";
     public static final String FILE_PATH_AS_FIRST_ARGUMENT = "Pass in the file path as first argument.";
     public static final String MISSING_COMMANDS = "MISSING_COMMANDS";
+    public static final String shanFamilyInitialStructure = "ADD_CHILD Queen_Anga Chit Male Amba,ADD_CHILD Queen_Anga Ish Male ,ADD_CHILD Queen_Anga Vich Male Lika,ADD_CHILD Queen_Anga Aras Male Chitra,ADD_CHILD Queen_Anga Satya Female Vyan,ADD_CHILD Amba Dritha Female Jaya,ADD_CHILD Amba Thritha Male ,ADD_CHILD Amba Vritha Female ,ADD_CHILD Lika Vila Female ,ADD_CHILD Lika Chika Female ,ADD_CHILD Chitra Jnki Female Arit,ADD_CHILD Chitra Ahit Male ,ADD_CHILD Satya Asva Male Satvy,ADD_CHILD Satya Vyas Male Krpi,ADD_CHILD Satya Atya Female ,ADD_CHILD Dritha Yodhan Male ,ADD_CHILD Jnki Laki Male ,ADD_CHILD Jnki Lavnya Female ,ADD_CHILD Satvy Vasa Female ,ADD_CHILD Krpi Kriya Male ,ADD_CHILD Krpi Krithi Female";
 
-    private FamilyTree theShanFamilyTree;
+    private FamilyTree kingShanFamilyTree;
 
     public PlanetLengaburu() throws Exception {
-        init();
+        kingShanFamilyTree = new FamilyTree("King_Shan", "Queen_Anga", Male);
+        Arrays.stream(shanFamilyInitialStructure.split(",")).forEach(this::processCommand);
     }
 
     public static void main(String[] args) throws Exception {
@@ -60,88 +54,12 @@ public class PlanetLengaburu {
 
     private String processCommand(String input) {
         List<String> params = Arrays.stream(input.split(" ")).collect(Collectors.toList());
-        String output;
-        if (params.isEmpty()) {
-            return INVALID_PARAMETERS;
-        }
-        switch (Operations.valueOf(params.get(0))) {
-            case ADD_CHILD:
-                Gender gender;
-                if (params.size() < 4 || isEmpty(params.get(1)) || isEmpty(params.get(2)) || isEmpty(params.get(3))
-                        || Objects.isNull(gender = Gender.fromValue(params.get(3)))) {
-                    return INVALID_PARAMETERS;
-                }
-                output = theShanFamilyTree.addMember(params.get(1), params.get(2), gender);
-                break;
-            case GET_RELATIONSHIP:
-                FamilyTree.Entry entry = theShanFamilyTree.getEntryWithMatchingName(params.get(1));
-                output = Objects.nonNull(entry) ? Optional.of(RelationShip.valueOf(ofNullable(params.get(2)).map(String::toUpperCase).map(s -> s.replaceAll("-", "_")).orElse(null)))
-                        .map(relationShip -> relationShip.getAllOfThem(entry))
-                        .map(strings -> String.join(" ", strings))
-                        .filter(StringUtils::isNotEmpty)
-                        .orElse(NONE)
-                        : PERSON_NOT_FOUND;
-                break;
-            default:
-                output = INVALID_OPERATION;
-        }
-        return output;
-    }
-
-    private void init() throws Exception {
-        theShanFamilyTree = new FamilyTree("King Shan", "Queen Anga", Male);
-        // Level 01
-        addMembers(theShanFamilyTree.getRootMember().getSpouse(), ImmutableList.of(
-                of("Chit", Male.name(), "Amba"),
-                of("Ish", Male.name()),
-                of("Vich", Male.name(), "Lika"),
-                of("Aras", Male.name(), "Chitra"),
-                of("Satya", Female.name(), "Vyan")
-        ));
-        // Level 02
-        addMembers("Amba", of(
-                of("Dritha", Female.name(), "Jaya"),
-                of("Thritha", Male.name()),
-                of("Vritha", Female.name())
-        ));
-        addMembers("Lika", of(
-                of("Vila", Female.name()),
-                of("Chika", Female.name())
-        ));
-        addMembers("Chitra", of(
-                of("Jnki", Female.name(), "Arit"),
-                of("Ahit", Male.name())
-        ));
-        addMembers("Satya", of(
-                of("Asva", Male.name(), "Satvy"),
-                of("Vyas", Male.name(), "Krpi"),
-                of("Atya", Female.name())
-        ));
-        // Level 03
-        addMembers("Dritha", of(
-                of("Yodhan", Male.name())
-        ));
-        addMembers("Jnki", of(
-                of("Laki", Male.name()),
-                of("Lavanya", Female.name())
-        ));
-        addMembers("Satvy", of(
-                of("Vasa", Female.name())
-        ));
-        addMembers("Krpi", of(
-                of("Kriya", Male.name()),
-                of("Krithi", Female.name())
-        ));
-    }
-
-    private void addMembers(String parent, List<List<String>> members) {
-        members.stream().forEach(member -> {
-            try {
-                theShanFamilyTree.addMember(parent, member.get(0), Gender.valueOf(member.get(1)), member.size() > 2 ? member.get(2) : null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        Operations operation;
+        return params.isEmpty()
+                ? INVALID_PARAMETERS
+                : Objects.isNull(operation = Operations.valueOf(params.get(0)))
+                    ? INVALID_OPERATION
+                    : operation.apply(params, kingShanFamilyTree);
     }
 
 }
