@@ -2,10 +2,7 @@ package com.problemsolving.geektrust.familytree;
 
 import com.google.common.collect.Sets;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,8 +29,8 @@ public class FamilyTree {
         } else if (parent.isMale() && Objects.equals(parent.member, mother)) {
             return CHILD_ADDITION_FAILED;
         } else {
-            newEntry.setParent(parent);
-            parent.getChildren().add(newEntry);
+            newEntry.parent = parent;
+            parent.children.add(newEntry);
             size++;
             return CHILD_ADDITION_SUCCEEDED;
         }
@@ -86,7 +83,7 @@ public class FamilyTree {
         private Entry parent;
         private Set<Entry> children;
 
-        public Entry(String member, Gender gender, String spouse, Entry parent) {
+        private Entry(String member, Gender gender, String spouse, Entry parent) {
             this.member = member;
             this.gender = gender;
             this.spouse = spouse;
@@ -94,28 +91,16 @@ public class FamilyTree {
             this.children = new LinkedHashSet<>();
         }
 
-        public Entry(String member, Gender gender, String spouse) {
+        private Entry(String member, Gender gender, String spouse) {
             this(member, gender, spouse, null);
-        }
-
-        public Entry(String member, Gender gender) {
-            this(member, gender, null, null);
         }
 
         public String getMember() {
             return member;
         }
 
-        public void setMember(String member) {
-            this.member = member;
-        }
-
         public String getSpouse() {
             return spouse;
-        }
-
-        public void setSpouse(String spouse) {
-            this.spouse = spouse;
         }
 
         public Gender getGender() {
@@ -134,12 +119,8 @@ public class FamilyTree {
             return parent;
         }
 
-        public void setParent(Entry parent) {
-            this.parent = parent;
-        }
-
         public Set<Entry> getChildren() {
-            return children;
+            return Collections.unmodifiableSet(children);
         }
 
         @Override
